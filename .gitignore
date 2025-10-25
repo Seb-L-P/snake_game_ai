@@ -1,0 +1,9 @@
+# Build outputs
+*.o
+snake_ai
+snake_human
+bin/
+
+# System / IDE files
+.DS_Store
+.vscode/
