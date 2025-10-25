@@ -5,36 +5,45 @@
 #include <iostream>
 
 int main() {
-    SnakeGame game(20, 10);
-    Brain brain;  // create an AI brain
-    Direction currentDir = RIGHT;
+    Brain brain;
 
-    double totalReward = 0.0;
+    const int episodes = 10000;
+    const int renderEvery = 1000; // 👀 show every 20th game
+    const int renderDelay = 25; // ms delay between frames when rendering
 
-    while (!game.isGameOver()) {
-        // 1. Get current game state
-        std::vector<double> state = game.getState();
+    for (int episode = 1; episode <= episodes; ++episode) {
+        SnakeGame game(20, 10);
+        Direction currentDir = RIGHT;
+        double totalReward = 0.0;
 
-        // 2. Ask the brain what to do
-        Action action = brain.decide(state);
+        bool shouldRender = (episode == 1) || (episode % renderEvery == 0) || (episode == episodes);
 
-        // 3. Update direction and move
-        currentDir = turn(currentDir, action);
 
-        //4. step environment and get reward/penalty
-        double reward = game.step(currentDir);
-        totalReward += reward;
+        while (!game.isGameOver()) {
+            std::vector<double> state = game.getState();
+            Action action = brain.decide(state);
+            currentDir = turn(currentDir, action);
+            double reward = game.step(currentDir);
+            std::vector<double> nextState = game.getState();
 
-        // 5. Render
-        system("clear");
-        game.render();
+            brain.update(state, action, reward, nextState);
+            totalReward += reward;
 
-        // 6. Slow down for visibility
-        std::cout << "Reward: " << reward << " | Total: " << totalReward << "\n";
+            // 👀 render only sometimes
+            if (shouldRender) {
+                system("clear");
+                std::cout << "Episode " << episode
+                          << " | Score: " << game.getScore()
+                          << " | Total Reward: " << totalReward << "\n";
+                game.render();
+                std::this_thread::sleep_for(std::chrono::milliseconds(renderDelay));
+            }
+        }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(150));
+        std::cout << "Episode " << episode
+                  << " | Final Score: " << game.getScore()
+                  << " | Total Reward: " << totalReward << "\n";
     }
-    
-    std::cout << "Game Over! Final Score: " << game.getScore() << "\n";
-    std::cout << "Total Reward: " << totalReward << "\n";
+
+    std::cout << "Training complete!\n";
 }
