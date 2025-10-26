@@ -5,7 +5,7 @@
 
 enum Action { TURN_LEFT = -1, STRAIGHT = 0, TURN_RIGHT = 1 };
 
-Direction turn(Direction current, Action action);
+// Direction turn(Direction current, Action action);
 
 class SnakeGame {
 public:
@@ -29,6 +29,7 @@ private:
     Point food;            // location of the food
     int score;             // total points
     bool gameOver;         // whether the game has ended
+    int stepsSinceFood;    // steps since last ate food
     std::mt19937 rng;      // random number generator
 
     // Helper function to place food randomly
